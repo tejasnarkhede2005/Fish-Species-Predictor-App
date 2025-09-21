@@ -117,12 +117,18 @@ def get_image_as_base64(path):
         return base64.b64encode(image_file.read()).decode()
 
 # --- Load The Model ---
+model = None
 try:
     with open('Random Forest_best_model.pkl', 'rb') as file:
         model = pickle.load(file)
 except FileNotFoundError:
     st.error("Model file not found. Please make sure 'Random Forest_best_model.pkl' is in the same directory.")
-    model = None
+except Exception as e:
+    st.error(f"An error occurred while loading the model. This is often due to a library version mismatch.")
+    st.error(f"Please ensure your environment has scikit-learn version 1.6.1 installed by running:")
+    st.code("pip install -r requirements.txt")
+    st.error(f"Error details: {e}")
+
 
 # --- Main Application ---
 def main():
@@ -148,32 +154,34 @@ def main():
     # --- Main Panel for Output ---
     st.markdown('<div style="height: 80px;"></div>', unsafe_allow_html=True) # Spacer for header
     
-    st.info("Enter the fish measurements in the sidebar and click 'Predict Species' to see the result.")
+    if model:
+        st.info("Enter the fish measurements in the sidebar and click 'Predict Species' to see the result.")
 
-    if model and predict_button:
-        # Create a DataFrame from the inputs
-        input_data = pd.DataFrame({
-            'Weight': [weight],
-            'Length1': [length1],
-            'Length2': [length2],
-            'Length3': [length3],
-            'Height': [height],
-            'Width': [width]
-        })
-        
-        # Make a prediction
-        prediction = model.predict(input_data)[0]
-        
-        # Display the prediction
-        st.markdown(f"""
-            <div class="prediction-box">
-                <h2>Predicted Fish Species</h2>
-                <p style="font-size: 1.5rem; font-weight: bold;">{prediction}</p>
-            </div>
-        """, unsafe_allow_html=True)
+        if predict_button:
+            # Create a DataFrame from the inputs
+            input_data = pd.DataFrame({
+                'Weight': [weight],
+                'Length1': [length1],
+                'Length2': [length2],
+                'Length3': [length3],
+                'Height': [height],
+                'Width': [width]
+            })
+            
+            # Make a prediction
+            prediction = model.predict(input_data)[0]
+            
+            # Display the prediction
+            st.markdown(f"""
+                <div class="prediction-box">
+                    <h2>Predicted Fish Species</h2>
+                    <p style="font-size: 1.5rem; font-weight: bold;">{prediction}</p>
+                </div>
+            """, unsafe_allow_html=True)
     
     # --- Footer ---
     st.markdown('<div class="footer"><p>Built with Streamlit by Gemini</p></div>', unsafe_allow_html=True)
 
 if __name__ == '__main__':
     main()
+

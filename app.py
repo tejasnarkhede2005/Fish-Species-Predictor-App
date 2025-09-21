@@ -122,12 +122,25 @@ try:
     with open('Random Forest_best_model.pkl', 'rb') as file:
         model = pickle.load(file)
 except FileNotFoundError:
-    st.error("Model file not found. Please make sure 'Random Forest_best_model.pkl' is in the same directory.")
+    st.error("❌ **Model file not found!**")
+    st.info("Please make sure 'Random Forest_best_model.pkl' is in the same directory as 'app.py'.")
+    st.stop()
 except Exception as e:
-    st.error(f"An error occurred while loading the model. This is often due to a library version mismatch.")
-    st.error(f"Please ensure your environment has scikit-learn version 1.6.1 installed by running:")
-    st.code("pip install -r requirements.txt")
-    st.error(f"Error details: {e}")
+    st.error("❌ **Error Loading Model**")
+    st.error("This app cannot function because the machine learning model could not be loaded.")
+    st.warning(
+        """
+        This issue is typically caused by a mismatch between the Python library versions used to create the model and the versions in this app's environment.
+        
+        **To fix this, please follow these steps in your terminal:**
+        
+        1.  Ensure you have activated your virtual environment.
+        2.  Run the command below to install the exact required versions:
+        """
+    )
+    st.code("pip install -r requirements.txt", language="bash")
+    st.error(f"**Internal Error Details:** {e}")
+    st.stop()
 
 
 # --- Main Application ---
